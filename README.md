@@ -42,6 +42,8 @@ GOOGLE_API_KEY=your_google_api_key_here
 ```
 Get your Google API key from [here](https://aistudio.google.com/app/apikey)
 
+This project uses *gemini-1.5-flash*
+
 ## Local Deployment
 1. Start the development server:
 ```bash
@@ -53,6 +55,14 @@ taipy run main.py --use-reloader
 
 ## Environment Variables
 GOOGLE_API_KEY: Your Google API key for Gemini
+
+## Sample Questions for AI
+1. What do you think of my resume?
+2. Do you think I can apply to *different job domain than currently* ? E.g. you are IT, but you want to apply to a job in HR.
+3. What should I show in my resumre for career switch?
+4. Do you think I should try applying to *higher position* ? E.g. you are a junior, but you want to apply to a senior position or a manager position.
+5. What should I do to improve my resume?
+6. I want a fresh start in my career, can you help me rewrite my resume?
 
 
 ## Contributing

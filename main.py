@@ -460,4 +460,4 @@ with tgb.Page() as page:
 if __name__ == "__main__":
     gui = Gui(page)
     conv = gui.add_partial("")
-    gui.run(title="Resume AI", host="0.0.0.0" dark_mode=False, margin="0px", debug=False, port=10000)
+    gui.run(title="Resume AI", host="0.0.0.0", dark_mode=False, margin="0px", debug=False, port=10000)
