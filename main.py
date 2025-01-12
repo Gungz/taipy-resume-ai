@@ -179,7 +179,6 @@ def generate_wordcloud(skills):
         wordcloud.to_image().save(buf, 'png')
         buf.seek(0)
         
-        # Encode to base64
         img_str = buf.getvalue()
         buf.close()
         
