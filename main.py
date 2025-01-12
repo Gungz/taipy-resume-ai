@@ -118,7 +118,6 @@ def send_message(state):
     if not state.conversation_chain:
         state.conversation_chain = initialize_chat(state.resume_text)
 
-    print("send message")
     state.messages.append(
         {
             "style": "user_message",
@@ -191,100 +190,100 @@ def generate_wordcloud(skills):
         return ""
 
 def handle_upload(state):
-    # Reset
-    reset_state(state)
-    reset_chat(state)
-    switch_page(state, "insights")
-
-    # Set initial upload state
-    state.is_uploading = True
-    state.upload_progress = 10
-    state.upload_status = "Loading PDF..."
-
-     # Load PDF content using PyMuPDFLoader
-    loader = PyMuPDFLoader(state.path_upload)
-    state.upload_progress = 30
-    state.upload_status = "Processing content..."
-    
-    documents = loader.load()
-    state.upload_progress = 50
-    state.upload_status = "Analyzing resume..."
-
-    state.resume_text = ""
-    for doc in documents:
-        state.resume_text += f"{doc.page_content}"
-
-    state.upload_progress = 70
-    state.upload_status = "Generating insights..."
-    
-    context_prompt = f"""Resume Content:
-    {state.resume_text}
-    
-    Analyze the resume and return a JSON object with the following information:
-    - age: estimated age based on experience (if available)
-    - gender: inferred gender (if available)
-    - num_skills: total number of technical and soft skills (0 if none)
-    - num_soft_skills: number of soft skills (0 if none)
-    - num_technical_skills: number of technical skills (0 if none)
-    - skills: list of technical and soft skills
-    - years_experience: total years of professional experience
-    - num_roles: total number of job positions held (0 if none)
-    - roles: list of job positions held, extract all, don't leave single one behind
-    - num_managerial_roles: number of managerial roles held (0 if none), only consider role as managerial if there's Lead, Manager, VP, Director, C-level indicated in the job title
-    - num_individual_contributor_roles: number of individual contributor roles held (0 if none)
-    - num_companies: total number of companies worked for (0 if none)
-    - companies: list of companies worked for along with years of working (use fractions not only round number), extract all don't leave single one behind
-    put N/A if the information is not available.
-    
-    Format your response as a valid JSON object only. Example:
-    {{
-        "age": 30,
-        "gender": "male",
-        "num_skills": 3,
-        "num_soft_skills": 1,
-        "num_technical_skills": 2,
-        "skills": ["Python", "Machine Learning", "Data Analysis"],
-        "years_experience": 8,
-        "num_roles": 4,
-        "roles": ["Data Scientist", "Machine Learning Engineer", "Data Analyst", "Research Scientist"],
-        "num_managerial_roles": 1,
-        "num_individual_contributor_roles": 3,
-        "num_companies": 3,
-        "companies": {{
-            "Company A": 3,
-            "Company B": 2,
-            "Company C": 1
-        }}
-    }}
-    Think step by step before answering.
-    """    
-    # Get response using content-aware prompt
-    response = llm.invoke(context_prompt).content
-    response = response.replace("```json", '').replace("```", '')
-
-    improve_prompt = f"""Resume Content:
-    {state.resume_text}
-    
-    Analyze the resume and check if there's a grammar or spelling mistake mistake (list the sentence with grammar mistake) and potential improvement in the resume.
-    Improvement could be in the form of a better sentence structure, more concise language, or a more effective use of keywords.
-    It can also be suggestion to add more skills, experience, or achievements.
-    Suggest job positions to apply based on the resume.
-    
-    Format your response as a markdown with 2 headers Grammar Check and Potential Improvement. Example:
-    ## Grammar Check
-    - List of grammar mistakes in detail with what sentence in wrong grammar
-    ## Potential Improvement
-    - List of potential improvements
-    ## Suggested Job Positions
-    - List of suggested job positions
-
-    Think step by step before answering and provide a detailed explanation for each improvement.
-    """    
-    # Get response using content-aware prompt
-    improve_response = llm.invoke(improve_prompt).content
-    state.improve_suggestion = improve_response
-
     try:
+        # Reset
+        reset_state(state)
+        reset_chat(state)
+        switch_page(state, "insights")
+
+        # Set initial upload state
+        state.is_uploading = True
+        state.upload_progress = 10
+        state.upload_status = "Loading PDF..."
+
+        # Load PDF content using PyMuPDFLoader
+        loader = PyMuPDFLoader(state.path_upload)
+        state.upload_progress = 30
+        state.upload_status = "Processing content..."
+        
+        documents = loader.load()
+        state.upload_progress = 50
+        state.upload_status = "Analyzing resume..."
+
+        state.resume_text = ""
+        for doc in documents:
+            state.resume_text += f"{doc.page_content}"
+
+        state.upload_progress = 70
+        state.upload_status = "Generating insights..."
+        
+        context_prompt = f"""Resume Content:
+        {state.resume_text}
+        
+        Analyze the resume and return a JSON object with the following information:
+        - age: estimated age based on experience (if available)
+        - gender: inferred gender (if available)
+        - num_skills: total number of technical and soft skills (0 if none)
+        - num_soft_skills: number of soft skills (0 if none)
+        - num_technical_skills: number of technical skills (0 if none)
+        - skills: list of technical and soft skills
+        - years_experience: total years of professional experience
+        - num_roles: total number of job positions held (0 if none)
+        - roles: list of job positions held, extract all, don't leave single one behind
+        - num_managerial_roles: number of managerial roles held (0 if none), only consider role as managerial if there's Lead, Manager, VP, Director, C-level indicated in the job title
+        - num_individual_contributor_roles: number of individual contributor roles held (0 if none)
+        - num_companies: total number of companies worked for (0 if none)
+        - companies: list of companies worked for along with years of working (use fractions not only round number), extract all don't leave single one behind
+        put N/A if the information is not available.
+        
+        Format your response as a valid JSON object only. Example:
+        {{
+            "age": 30,
+            "gender": "male",
+            "num_skills": 3,
+            "num_soft_skills": 1,
+            "num_technical_skills": 2,
+            "skills": ["Python", "Machine Learning", "Data Analysis"],
+            "years_experience": 8,
+            "num_roles": 4,
+            "roles": ["Data Scientist", "Machine Learning Engineer", "Data Analyst", "Research Scientist"],
+            "num_managerial_roles": 1,
+            "num_individual_contributor_roles": 3,
+            "num_companies": 3,
+            "companies": {{
+                "Company A": 3,
+                "Company B": 2,
+                "Company C": 1
+            }}
+        }}
+        Think step by step before answering.
+        """    
+        # Get response using content-aware prompt
+        response = llm.invoke(context_prompt).content
+        response = response.replace("```json", '').replace("```", '')
+
+        improve_prompt = f"""Resume Content:
+        {state.resume_text}
+        
+        Analyze the resume and check if there's a grammar or spelling mistake mistake (list the sentence with grammar mistake) and potential improvement in the resume.
+        Improvement could be in the form of a better sentence structure, more concise language, or a more effective use of keywords.
+        It can also be suggestion to add more skills, experience, or achievements.
+        Suggest job positions to apply based on the resume.
+        
+        Format your response as a markdown with 2 headers Grammar Check and Potential Improvement. Example:
+        ## Grammar Check
+        - List of grammar mistakes in detail with what sentence in wrong grammar
+        ## Potential Improvement
+        - List of potential improvements
+        ## Suggested Job Positions
+        - List of suggested job positions
+
+        Think step by step before answering and provide a detailed explanation for each improvement.
+        """    
+        # Get response using content-aware prompt
+        improve_response = llm.invoke(improve_prompt).content
+        state.improve_suggestion = improve_response
+
         # Parse JSON response
         analysis = json.loads(response)
         
@@ -334,7 +333,7 @@ def handle_upload(state):
         state.upload_status = f"Error: {str(e)}"
         state.is_uploading = False
         state.show_analysis = False
-        notify(state, "error", f"Error parsing response: {str(e)}")
+        notify(state, "error", f"Error processing resume: {str(e)}")
 
 # Initialize chat model with resume context
 def initialize_chat(resume_text):
